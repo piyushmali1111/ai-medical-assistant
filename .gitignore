@@ -1,0 +1,30 @@
+# Environment and secrets
+.env
+
+# Prompt instructions (excluded from git)
+medical_assistant_ide_prompt.md
+
+# Data and vector stores
+data/raw/
+data/chroma*/
+
+# Python cache & virtualenv
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Testing & linting
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# IDE
+.vscode/
+.idea/
+

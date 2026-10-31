@@ -1,0 +1,2 @@
+"""AI Medical Assistant package."""
+
