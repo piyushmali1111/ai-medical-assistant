@@ -197,3 +197,4 @@ python -m eval.compare_embeddings
 ## ⚖️ Medical Disclaimer
 
 > **IMPORTANT:** This application is strictly intended for **educational, research, and reference purposes**. It is not a certified medical device and does not provide clinical diagnosis, medical advice, or personalized treatment plans. Always consult a licensed healthcare professional for medical decisions. In case of an emergency, immediately contact local emergency services (112 / 108 in India; 911 in North America; 999 in the UK).
+

@@ -82,3 +82,4 @@ The complete execution state is maintained in `MedicalAssistantState` (`src/stat
 - **Exponential Backoff**: 4 retry attempts with randomized jitter on transient 429/quota errors.
 - **In-Memory Caching**: Router classifications and query rewrites are cached across turns in a session.
 - **Emergency Bypass**: Zero LLM calls for emergency queries via heuristic shortcut.
+

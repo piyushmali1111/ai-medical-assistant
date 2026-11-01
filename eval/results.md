@@ -32,3 +32,4 @@
 4. **Out-of-Scope Queries (3 queries)**:
    - Python programming, personalized dosing requests, and sports trivia.
    - Polite refusal explaining clinical guideline scope.
+

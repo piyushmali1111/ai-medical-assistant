@@ -1,0 +1,27 @@
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+	__start__([<p>__start__</p>]):::first
+	router(router)
+	retriever(retriever)
+	reasoning(reasoning)
+	answer(answer)
+	emergency(emergency)
+	out_of_scope(out_of_scope)
+	__end__([<p>__end__</p>]):::last
+	__start__ --> router;
+	reasoning --> answer;
+	retriever -.-> answer;
+	retriever -.-> reasoning;
+	router -.-> emergency;
+	router -.-> out_of_scope;
+	router -.-> retriever;
+	answer --> __end__;
+	emergency --> __end__;
+	out_of_scope --> __end__;
+	classDef default fill:#f2f0ff,line-height:1.2
+	classDef first fill-opacity:0
+	classDef last fill:#bfb6fc
