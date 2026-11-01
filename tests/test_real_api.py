@@ -12,14 +12,6 @@ has_api_key = bool(os.getenv("GOOGLE_API_KEY", "").strip())
 
 
 @pytest.mark.skipif(not has_api_key, reason="Real-API test requires a valid GOOGLE_API_KEY in .env")
-def test_real_gemini_emergency():
-    clear_session_caches()
-    res = run_query("I have sudden crushing chest pain radiating to my jaw and I am sweating heavily")
-    assert res["route"] == "emergency"
-    assert "EMERGENCY" in res["answer"].upper()
-
-
-@pytest.mark.skipif(not has_api_key, reason="Real-API test requires a valid GOOGLE_API_KEY in .env")
 def test_real_gemini_out_of_scope():
     clear_session_caches()
     res = run_query("Can you write a python script to sort a list of numbers?")

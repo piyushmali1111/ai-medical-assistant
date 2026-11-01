@@ -167,9 +167,7 @@ def main():
         with st.chat_message(msg["role"]):
             if msg["role"] == "assistant":
                 route = msg.get("route", "document_qa")
-                if route == "emergency":
-                    st.markdown('<span class="route-badge badge-emergency">🚨 Emergency Response</span>', unsafe_allow_html=True)
-                elif route == "out_of_scope":
+                if route == "out_of_scope":
                     st.markdown('<span class="route-badge badge-scope">ℹ️ Out of Scope</span>', unsafe_allow_html=True)
                 else:
                     st.markdown('<span class="route-badge badge-qa">🩺 Clinical Document Q&A</span>', unsafe_allow_html=True)
@@ -229,9 +227,7 @@ def main():
                     }
 
                     # Render response
-                    if route == "emergency":
-                        st.markdown('<span class="route-badge badge-emergency">🚨 Emergency Response</span>', unsafe_allow_html=True)
-                    elif route == "out_of_scope":
+                    if route == "out_of_scope":
                         st.markdown('<span class="route-badge badge-scope">ℹ️ Out of Scope</span>', unsafe_allow_html=True)
                     else:
                         st.markdown('<span class="route-badge badge-qa">🩺 Clinical Document Q&A</span>', unsafe_allow_html=True)

@@ -13,7 +13,7 @@ class MedicalAssistantState(TypedDict):
     chat_history: List[Dict[str, str]] # [{'role': 'user'|'assistant', 'content': '...'}]
 
     # Routing
-    route: str  # 'document_qa' | 'emergency' | 'out_of_scope'
+    route: str  # 'document_qa' | 'out_of_scope'
     route_reason: Optional[str]
 
     # Query Rewriting & Retrieval

@@ -25,7 +25,6 @@ from src.prompts import (
     REASONING_USER_PROMPT,
     ANSWER_SYSTEM_PROMPT,
     ANSWER_USER_PROMPT,
-    EMERGENCY_RESPONSE,
     OUT_OF_SCOPE_RESPONSE,
     NOT_FOUND_RESPONSE,
     MEDICAL_DISCLAIMER,
@@ -64,8 +63,8 @@ def format_chat_history(messages: List[Dict[str, str]]) -> str:
 
 def router_node(state: MedicalAssistantState) -> Dict[str, Any]:
     """
-    Router node: Classifies query into 'document_qa', 'emergency', or 'out_of_scope'.
-    Uses structured output with retry and fallback.
+    Router node: Classifies query into 'document_qa' or 'out_of_scope' purely using the LLM.
+    Uses structured output with retry and safe fallback.
     """
     start_time = time.time()
     query = state["query"].strip()
@@ -81,25 +80,7 @@ def router_node(state: MedicalAssistantState) -> Dict[str, Any]:
             "node_latencies": {**state.get("node_latencies", {}), "router": time.time() - start_time},
         }
 
-    # Fast heuristic check for clear-cut emergencies to save LLM calls & latency
-    emergency_keywords = [
-        "chest pain", "heart attack", "can't breathe", "cannot breathe",
-        "stroke", "slurred speech", "facial drooping", "suicidal", "kill myself",
-        "severe bleeding", "unconscious", "collapse"
-    ]
-    lower_query = query.lower()
-    if any(k in lower_query for k in emergency_keywords):
-        decision = RouterDecision(
-            route="emergency",
-            reason="Heuristic detection of acute critical symptoms or distress."
-        )
-        _router_cache[cache_key] = decision
-        return {
-            "route": "emergency",
-            "route_reason": decision.reason,
-            "node_latencies": {**state.get("node_latencies", {}), "router": time.time() - start_time},
-        }
-
+    # Route classification purely via LLM structured output
     llm = get_llm(temperature=0.0)
     structured_llm = llm.with_structured_output(RouterDecision)
     prompt_messages = [
@@ -335,19 +316,6 @@ def answer_node(state: MedicalAssistantState) -> Dict[str, Any]:
         "answer": final_answer,
         "llm_calls": llm_calls,
         "node_latencies": {**state.get("node_latencies", {}), "answer": latency},
-    }
-
-
-def emergency_node(state: MedicalAssistantState) -> Dict[str, Any]:
-    """
-    Emergency node: Returns static guidance without calling the LLM.
-    Zero quota consumption, zero latency overhead.
-    """
-    start_time = time.time()
-    return {
-        "answer": EMERGENCY_RESPONSE,
-        "sources": [],
-        "node_latencies": {**state.get("node_latencies", {}), "emergency": time.time() - start_time},
     }
 
 

@@ -9,7 +9,6 @@ from src.agents import (
     retriever_node,
     reasoning_node,
     answer_node,
-    emergency_node,
     out_of_scope_node,
 )
 from src.utils import logger
@@ -18,8 +17,6 @@ from src.utils import logger
 def route_decision_edge(state: MedicalAssistantState) -> str:
     """Conditional branching edge following the router classification."""
     route = state.get("route", "document_qa")
-    if route == "emergency":
-        return "emergency"
     if route == "out_of_scope":
         return "out_of_scope"
     return "retriever"
@@ -41,19 +38,17 @@ def build_graph() -> StateGraph:
     workflow.add_node("retriever", retriever_node)
     workflow.add_node("reasoning", reasoning_node)
     workflow.add_node("answer", answer_node)
-    workflow.add_node("emergency", emergency_node)
     workflow.add_node("out_of_scope", out_of_scope_node)
 
     # Edge: START -> router
     workflow.add_edge(START, "router")
 
-    # Conditional: router -> {retriever, emergency, out_of_scope}
+    # Conditional: router -> {retriever, out_of_scope}
     workflow.add_conditional_edges(
         "router",
         route_decision_edge,
         {
             "retriever": "retriever",
-            "emergency": "emergency",
             "out_of_scope": "out_of_scope",
         },
     )
@@ -73,7 +68,6 @@ def build_graph() -> StateGraph:
     workflow.add_edge("answer", END)
 
     # Terminal static paths -> END
-    workflow.add_edge("emergency", END)
     workflow.add_edge("out_of_scope", END)
 
     return workflow

@@ -5,17 +5,8 @@ from langchain_core.messages import AIMessage
 from langchain_core.documents import Document
 
 from src.graph import run_query
-from src.prompts import RouterDecision, RelevanceDecision, NOT_FOUND_RESPONSE, EMERGENCY_RESPONSE
+from src.prompts import RouterDecision, RelevanceDecision, NOT_FOUND_RESPONSE
 from src.agents import clear_session_caches
-
-
-def test_graph_emergency_route_heuristic_no_llm():
-    """Verify emergency queries take the zero-LLM emergency path."""
-    clear_session_caches()
-    res = run_query("I have severe crushing chest pain radiating to my neck")
-    assert res["route"] == "emergency"
-    assert EMERGENCY_RESPONSE in res["answer"]
-    assert res["sources"] == []
 
 
 @patch("src.agents.call_llm_with_retry")

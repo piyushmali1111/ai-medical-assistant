@@ -9,10 +9,9 @@ from pydantic import BaseModel, Field
 
 class RouterDecision(BaseModel):
     """Routing classification for an incoming user query."""
-    route: Literal["document_qa", "emergency", "out_of_scope"] = Field(
-        description="The assigned route: 'emergency' for acute life-threatening symptoms; "
-                    "'out_of_scope' for non-medical queries or personal prescription requests; "
-                    "'document_qa' for medical clinical guidelines and reference questions."
+    route: Literal["document_qa", "out_of_scope"] = Field(
+        description="The assigned route: 'out_of_scope' for non-medical queries or personal prescription/dosing requests; "
+                    "'document_qa' for medical questions, symptoms, conditions, clinical guidelines, and reference questions."
     )
     reason: str = Field(
         description="A brief explanation (1-2 sentences) justifying the routing decision."
@@ -41,22 +40,6 @@ MEDICAL_DISCLAIMER = (
     "Always consult a qualified healthcare professional for medical concerns or changes to medication.*"
 )
 
-EMERGENCY_RESPONSE = (
-    "🚨 **POTENTIAL MEDICAL EMERGENCY DETECTED**\n\n"
-    "If you or someone nearby is experiencing acute, severe, or life-threatening symptoms—such as:\n"
-    "- Severe chest pain, pressure, or radiating pain to the arm or jaw\n"
-    "- Sudden difficulty breathing or shortness of breath\n"
-    "- Signs of stroke (sudden facial drooping, arm weakness, slurred speech)\n"
-    "- Uncontrolled bleeding or sudden loss of consciousness\n"
-    "- Acute poisoning or thoughts of self-harm\n\n"
-    "**Please seek immediate emergency medical care:**\n"
-    "• In India, call **112** (National Emergency) or **108** (Ambulance / Emergency Services).\n"
-    "• In the US/Canada, call **911**.\n"
-    "• In the UK, call **999**.\n"
-    "• Or proceed directly to the nearest hospital emergency department.\n"
-    + MEDICAL_DISCLAIMER
-)
-
 OUT_OF_SCOPE_RESPONSE = (
     "I am an **AI Medical Assistant** specialized exclusively in answering questions based on official "
     "clinical practice guidelines and standard treatment workflows (including WHO, ICMR, and NTEP guidelines for "
@@ -80,18 +63,15 @@ NOT_FOUND_RESPONSE = (
 # =====================================================================
 
 ROUTER_SYSTEM_PROMPT = """You are an expert clinical triage and classification assistant for a medical information system.
-Analyze the user's latest query along with conversation history, and classify it into exactly one of three categories:
+Analyze the user's latest query along with conversation history, and classify it into exactly one of two categories:
 
-1. 'emergency':
-   - Any acute, urgent, or life-threatening symptoms (e.g., severe crushing chest pain, suspected heart attack or stroke, severe breathing difficulty, anaphylaxis, severe acute bleeding, suicidal ideation, collapse).
+1. 'document_qa':
+   - Any question about medical concepts, conditions, clinical guidelines, disease definitions, symptoms, acute or emergency presentations, diagnostic criteria, standard treatment workflows, drug classes, cutoffs, and evidence-based recommendations.
 
 2. 'out_of_scope':
-   - Queries unrelated to healthcare or medicine.
-   - Requests for personal diagnosis ("Do I have tuberculosis?", "Diagnose my condition").
-   - Requests for personalized drug prescriptions or customized patient dosing ("How many mg of metformin should I take right now?").
-
-3. 'document_qa':
-   - All other medical information questions, clinical guidelines, disease definitions, diagnostic criteria, standard treatment workflows, drug classes, cutoffs, and evidence-based recommendations.
+   - Queries completely unrelated to healthcare, medicine, or biology.
+   - Requests for personal diagnosis ("Diagnose me based on this test").
+   - Requests for personalized drug prescriptions or customized patient dosing ("Prescribe me metformin 500mg tonight").
 
 Return your decision in the requested structured JSON schema with 'route' and 'reason'."""
 

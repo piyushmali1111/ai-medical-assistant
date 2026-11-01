@@ -6,7 +6,7 @@
 
 | Metric | Score | Detail |
 |---|---|---|
-| **Routing Accuracy** | **100.0%** | 25/25 queries correctly categorized (`document_qa`, `emergency`, `out_of_scope`) |
+| **Routing Accuracy** | **100.0%** | 25/25 queries correctly categorized (`document_qa`, `out_of_scope`) |
 | **Retrieval Hit Rate (@ top-k=5)** | **100.0%** | 15/15 answerable clinical questions matched target source in top-k |
 | **Citation Rate** | **100.0%** | Answers include explicit inline citations `[Title, p.X]` derived from chunk metadata |
 | **Correct 'Not Found' Rate** | **100.0%** | 4/4 unanswerable questions correctly identified without hallucination |

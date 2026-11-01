@@ -6,13 +6,12 @@ This document details the architectural topology, state machine, and engineering
 
 ## 1. High-Level System Architecture
 
-The assistant implements an agentic workflow using **LangGraph** where an incoming query is classified by a triage router and handed off to specialized agents for retrieval, clinical reasoning, and grounded answer synthesis.
+The assistant implements an agentic workflow using **LangGraph** where an incoming query is classified by an LLM-driven triage router and handed off to specialized agents for retrieval, clinical reasoning, and grounded answer synthesis.
 
 ```mermaid
 flowchart TD
-    Start([User Query]) --> Router[Router Node\nTriage & Intent Classification]
+    Start([User Query]) --> Router[Router Node\nLLM Triage & Intent Classification]
     
-    Router -->|emergency| Emergency[Emergency Node\nStatic Redirection - No LLM]
     Router -->|out_of_scope| OutOfScope[Out of Scope Node\nGuidance & Scope Refusal]
     Router -->|document_qa| Retriever[Retriever Node\nQuery Rewrite + Top-K Search]
     
@@ -22,8 +21,7 @@ flowchart TD
     
     Reasoning --> Answer[Answer Node\nSynthesis with [Title, p.X] Citations]
     
-    Emergency --> EndNode([Response + Disclaimer])
-    OutOfScope --> EndNode
+    OutOfScope --> EndNode([Response + Disclaimer])
     AnswerNotFound --> EndNode
     Answer --> EndNode
 ```
@@ -38,7 +36,7 @@ The complete execution state is maintained in `MedicalAssistantState` (`src/stat
 |---|---|---|
 | `query` | `str` | Original user question |
 | `chat_history` | `List[Dict[str, str]]` | Recent conversational context (up to 4 turns) |
-| `route` | `str` | Routing branch: `document_qa`, `emergency`, or `out_of_scope` |
+| `route` | `str` | Routing branch: `document_qa` or `out_of_scope` |
 | `route_reason` | `Optional[str]` | Brief justification for the classification |
 | `rewritten_query` | `Optional[str]` | Standalone search query optimized for vector lookup |
 | `documents` | `List[Document]` | Retrieved chunks with source, title, and page metadata |
@@ -55,7 +53,7 @@ The complete execution state is maintained in `MedicalAssistantState` (`src/stat
 ## 3. Engineering Decisions & Design Rationale
 
 ### 3.1 Why LangGraph Multi-Agent Architecture?
-- **Deterministic Control**: Clinical safety requires hard guarantees. Urgent symptoms (chest pain, stroke signs) bypass generative models entirely via static code paths (`emergency` node), eliminating hallucination risk and zeroing out latency.
+- **Intelligent LLM Routing**: An LLM triage router dynamically identifies whether queries relate to clinical medical topics or are completely out-of-scope, using structured outputs and Pydantic schemas.
 - **Separation of Concerns**: Decomposing search reformulation, semantic retrieval, clinical reasoning, and response generation into discrete nodes enables modular testing, targeted caching, and granular observability.
 
 ### 3.2 Chunking Strategy
@@ -81,5 +79,4 @@ The complete execution state is maintained in `MedicalAssistantState` (`src/stat
 - **Central Rate Limiter**: Enforces a configurable requests-per-minute ceiling (`RPM_LIMIT=15`).
 - **Exponential Backoff**: 4 retry attempts with randomized jitter on transient 429/quota errors.
 - **In-Memory Caching**: Router classifications and query rewrites are cached across turns in a session.
-- **Emergency Bypass**: Zero LLM calls for emergency queries via heuristic shortcut.
 

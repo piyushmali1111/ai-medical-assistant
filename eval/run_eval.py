@@ -114,13 +114,7 @@ def run_evaluation(use_judge: bool = False, run_ablation: bool = False) -> Dict[
         else:
             # Offline benchmark mode without API key
             lower_q = q_text.lower()
-            if any(k in lower_q for k in ["chest pain", "heart attack", "collapsed", "drooping", "suicidal", "suicide", "stroke"]):
-                actual_route = "emergency"
-                answer = "🚨 POTENTIAL MEDICAL EMERGENCY DETECTED\n\nSeek immediate emergency care."
-                docs = []
-                sources = []
-                calls = 0
-            elif any(k in lower_q for k in ["python", "prescribe me", "cricket", "world cup", "brand and dosage"]):
+            if any(k in lower_q for k in ["python", "prescribe me", "cricket", "world cup", "brand and dosage"]):
                 actual_route = "out_of_scope"
                 answer = "I am an AI Medical Assistant specialized exclusively in clinical guidelines."
                 docs = []

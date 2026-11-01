@@ -8,13 +8,11 @@ from src.state import MedicalAssistantState
 from src.prompts import (
     RouterDecision,
     RelevanceDecision,
-    EMERGENCY_RESPONSE,
     OUT_OF_SCOPE_RESPONSE,
     NOT_FOUND_RESPONSE,
     MEDICAL_DISCLAIMER,
 )
 from src.agents import (
-    emergency_node,
     out_of_scope_node,
     router_node,
     reasoning_node,
@@ -41,14 +39,6 @@ def get_base_state(query: str = "Test question") -> MedicalAssistantState:
     }
 
 
-def test_emergency_node_static_response():
-    state = get_base_state("I have severe crushing chest pain")
-    res = emergency_node(state)
-    assert res["answer"] == EMERGENCY_RESPONSE
-    assert len(res["sources"]) == 0
-    assert "emergency" in res["node_latencies"]
-
-
 def test_out_of_scope_node_static_response():
     state = get_base_state("Write python code")
     res = out_of_scope_node(state)
@@ -56,12 +46,17 @@ def test_out_of_scope_node_static_response():
     assert len(res["sources"]) == 0
 
 
-def test_router_heuristic_emergency():
+@patch("src.agents.call_llm_with_retry")
+def test_router_node_llm_out_of_scope(mock_call):
     clear_session_caches()
-    state = get_base_state("I am having severe chest pain and radiating shoulder pain")
+    mock_call.return_value = RouterDecision(
+        route="out_of_scope",
+        reason="Query asks for Python code unrelated to medical guidelines."
+    )
+    state = get_base_state("Write a quicksort function")
     res = router_node(state)
-    assert res["route"] == "emergency"
-    assert "Heuristic" in res["route_reason"]
+    assert res["route"] == "out_of_scope"
+    assert "Python code" in res["route_reason"]
 
 
 @patch("src.agents.call_llm_with_retry")

@@ -7,8 +7,7 @@ An evidence-based clinical guidelines assistant built with **LangGraph**, **Lang
 ## 🌟 Key Features
 
 1. **Multi-Agent Orchestration with LangGraph**:
-   - **Triage Router**: Dynamically categorizes queries into `document_qa`, `emergency`, or `out_of_scope`.
-   - **Zero-Latency Emergency Path**: Critical symptoms (chest pain, stroke signs, breathing difficulty) trigger immediate emergency hotline guidance (112 / 108 in India; 911; 999) without consuming LLM API calls.
+   - **LLM Triage Router**: Dynamically categorizes queries into `document_qa` or `out_of_scope` using Gemini structured output (`RouterDecision`).
    - **Contextual Retrieval & Query Rewriting**: Resolves pronouns and conversational follow-ups into standalone medical search queries.
    - **Clinical Reasoning & Grounded Synthesis**: Synthesizes verified facts with mandatory inline citations.
 
@@ -31,9 +30,8 @@ An evidence-based clinical guidelines assistant built with **LangGraph**, **Lang
 
 ```mermaid
 flowchart TD
-    Start([User Query]) --> Router[Router Node\nTriage & Intent Classification]
+    Start([User Query]) --> Router[Router Node\nLLM Triage & Intent Classification]
     
-    Router -->|emergency| Emergency[Emergency Node\nStatic Redirection - No LLM]
     Router -->|out_of_scope| OutOfScope[Out of Scope Node\nGuidance & Scope Refusal]
     Router -->|document_qa| Retriever[Retriever Node\nQuery Rewrite + Top-K Search]
     
@@ -43,8 +41,7 @@ flowchart TD
     
     Reasoning --> Answer[Answer Node\nSynthesis with [Title, p.X] Citations]
     
-    Emergency --> EndNode([Response + Disclaimer])
-    OutOfScope --> EndNode
+    OutOfScope --> EndNode([Response + Disclaimer])
     AnswerNotFound --> EndNode
     Answer --> EndNode
 ```
@@ -58,7 +55,7 @@ Evaluated across **25 verified clinical benchmark questions** (`eval/questions.j
 
 | Metric | Score | Detail |
 |---|---|---|
-| **Routing Accuracy** | **100.0%** | 25/25 queries correctly categorized (`document_qa`, `emergency`, `out_of_scope`) |
+| **Routing Accuracy** | **100.0%** | 25/25 queries correctly categorized (`document_qa`, `out_of_scope`) |
 | **Retrieval Hit Rate (@ top-k=5)** | **100.0%** | 15/15 answerable clinical questions matched target source in top-k |
 | **Citation Rate** | **100.0%** | Answers include explicit inline citations `[Title, p.X]` derived from chunk metadata |
 | **Correct 'Not Found' Rate** | **100.0%** | 4/4 unanswerable questions correctly identified without hallucination |
@@ -169,9 +166,8 @@ Screenshots can be stored in [`docs/img/`](docs/img/).
 
 1. **Per-Project Quotas**: Rate limits apply across your Google AI Studio project, not per API key.
 2. **Exponential Backoff**: Built-in 4-attempt retry wrapper with randomized jitter for transient 429 errors.
-3. **Emergency Bypass**: Emergency symptoms are filtered via heuristic rules and static templates, consuming 0 tokens and 0 API calls.
-4. **Session Caching**: Router decisions and rewritten queries are cached in memory within each session.
-5. **Data Privacy Advisory**: On Google's free tier, inputs may be used to train and refine models. **Do not input identifiable personal health data (PHI/PII).**
+3. **Session Caching**: Router decisions and rewritten queries are cached in memory within each session.
+4. **Data Privacy Advisory**: On Google's free tier, inputs may be used to train and refine models. **Do not input identifiable personal health data (PHI/PII).**
 
 ---
 
